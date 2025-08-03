@@ -72,6 +72,8 @@ async function initTables() {
   `);
 }
 
+initTables()
+
 async function requireAuth(req, res, next) {
     const session = await auth.api.getSession({
         headers: fromNodeHeaders(req.headers)
@@ -86,6 +88,7 @@ async function requireAuth(req, res, next) {
 
     next();
 }
+
 app.get('/', requireAuth ,async (req, res) => {
   res.render('index')
 })
@@ -126,7 +129,6 @@ app.post('/sign-up', async (req, res) => {
         }
     }
 })
-initTables()
 
 app.get('/log-in', (req, res) => {
   res.render('login', { error: null })
