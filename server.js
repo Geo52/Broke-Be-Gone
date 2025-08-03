@@ -1,12 +1,14 @@
 // express
-import express, { response } from 'express'
+import express from 'express'
 const app = express()
 // dotenv
 import 'dotenv/config'
-// postgres
+// postgres/betterauth
 import { auth, pool } from "./auth.js"
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
+import { APIError } from 'better-auth'
 
+// ejs
 app.set("view engine", "ejs")
 app.use(express.static('public'));
 
