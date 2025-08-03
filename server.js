@@ -91,18 +91,6 @@ app.get('/', requireAuth ,async (req, res) => {
 })
 
 // user auth routes
-app.post('/logout', async (req, res) => {
-    const result = await auth.api.signOut({
-        headers: req.headers,
-        asResponse: true
-    })
-
-    const setCookieHeader = result.headers.get('set-cookie');
-    res.set('set-cookie', setCookieHeader);
-
-    res.redirect('/log-in')
-})
-
 app.get('/sign-up', (req, res) => {
     res.render('signup', { error: null })
 })
@@ -139,45 +127,6 @@ app.post('/sign-up', async (req, res) => {
     }
 })
 initTables()
-
-
-
-// user auth routes
-app.get('/sign-up', (req, res) => {
-  res.render('signup', { error: null })
-})
-
-app.post('/sign-up', async (req, res) => {
-  const { email, password, name } = req.body;
-
-  try {
-    await auth.api.signUpEmail({
-      body: {
-        email,
-        password,
-        name,
-      }
-
-    })
-
-    const response = await auth.api.signInEmail({
-      body: { email, password },
-      headers: fromNodeHeaders(req.body),
-      asResponse: true
-    })
-
-    res.set('set-cookie', response.headers.get('set-cookie'));
-
-    res.redirect('/')
-  } catch (error) {
-    if (error instanceof APIError) {
-      res.render('signup', {
-        error: error.message
-      })
-
-    }
-  }
-})
 
 app.get('/log-in', (req, res) => {
   res.render('login', { error: null })
