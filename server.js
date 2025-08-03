@@ -6,7 +6,7 @@ import 'dotenv/config'
 // postgres/betterauth
 import { auth, pool } from "./auth.js"
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
-import { APIError } from 'better-auth'
+import { APIError } from 'better-auth/api'
 
 // ejs
 app.set("view engine", "ejs")
