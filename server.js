@@ -147,21 +147,35 @@ app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
   const userId = req.user.id
 
   const tokenResponse = await plaidClient.itemPublicTokenExchange({ public_token })
-
   const accessToken = tokenResponse.data.access_token
   const itemId = tokenResponse.data.item_id
 
+  // store institution
+  const itemResponse = await plaidClient.itemGet({ access_token: accessToken });
+  const institutionId = itemResponse.data.item.institution_id;
+
+  let institutionName = null;
+
+  if (institutionId) {
+    const institutionResponse = await plaidClient.institutionsGetById({
+      institution_id: institutionId,
+      country_codes: ['US'],
+    });
+    institutionName = institutionResponse.data.institution.name;
+  }
+  
   const id = crypto.randomUUID()
   const now = new Date()
-
   await pool.query(
     `
-      INSERT INTO "plaid_account" (
-        id, "userId", "itemId", "accessToken", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO "plaid_account" (
+          id, "userId", "itemId", "accessToken",
+          "institutionId", "institutionName",
+          "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `,
-    [id, userId, itemId, accessToken, now, now]
-  )
+    [id, userId, itemId, accessToken, institutionId, institutionName, now, now]
+  );
 
   res.json({ success: true })
 })
@@ -184,7 +198,7 @@ app.get('/api/balance', requireAuth, async (req, res) => {
     const accessToken = result.rows[i].accessToken
     const balanceResponse = await plaidClient.accountsBalanceGet({ access_token: accessToken })
     const accounts = balanceResponse.data.accounts
-    
+
     for (let j = 0; j < accounts.length; j++) {
       allBalances.push(accounts[j])
     }
