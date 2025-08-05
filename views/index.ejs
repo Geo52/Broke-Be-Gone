@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>broke be gone</title>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 </head>
 
 <body>
@@ -12,6 +13,54 @@
   <form action="/logout" method="POST">
     <button type="submit">Sign Out</button>
   </form>
+
+  <button id="link-account">Link Bank Account</button>
+  <div id="balance"></div>
+  <script>
+    async function createLinkToken() {
+      const res = await fetch('/api/create_link_token')
+      const data = await res.json()
+      return data.link_token
+    }
+
+    async function initPlaid() {
+      const linkToken = await createLinkToken()
+
+      plaidHandler = Plaid.create({
+        token: linkToken,
+        onSuccess: async (public_token, metadata) => {
+          await fetch('/api/exchange_public_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              public_token
+            })
+          })
+        },
+      })
+
+      plaidHandler.open()
+    }
+
+    async function getBalance() {
+      const res = await fetch('/api/balance')
+      const data = await res.json()
+      const accounts = data.accounts
+
+      for (let i = 0; i < accounts.length; i++) {
+        console.log(accounts[i].name);
+      }
+
+    }
+
+    document.getElementById('link-account').addEventListener('click', () => {
+      initPlaid()
+    })
+
+    getBalance()
+  </script>
 </body>
 
 </html>
