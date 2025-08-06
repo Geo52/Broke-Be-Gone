@@ -47,12 +47,34 @@
     async function getBalance() {
       const res = await fetch('/api/balance')
       const data = await res.json()
-      const accounts = data.accounts
+      const balanceDiv = document.getElementById('balance')
+      balanceDiv.innerHTML = '' // Clear previous content
 
-      for (let i = 0; i < accounts.length; i++) {
-        // console.log(accounts[i].name);
+      for (let i = 0; i < data.length; i++) {
+        // Create and append bank name
+        const bankName = document.createElement('h2')
+        bankName.textContent = data[i].item.institution_name
+        balanceDiv.appendChild(bankName)
+
+        const ul = document.createElement('ul')
+
+        for (let j = 0; j < data[i].accounts.length; j++) {
+          // Create and append account info
+          const li = document.createElement('li')
+          li.textContent = `${data[i].accounts[j].name}: $${data[i].accounts[j].balances.current}`
+          ul.appendChild(li)
+        }
+
+        balanceDiv.appendChild(ul)
       }
 
+      //   for (let i = 0; i < data.length; i++) {
+      //     console.log(data[i].item.institution_name);
+      //     for (let j = 0; j < data[i].accounts.length; j++) {
+      //       console.log(data[i].accounts[j].name);
+      //       console.log(data[i].accounts[j].balances.current);
+      //     }
+      //   }
     }
 
     document.getElementById('link-account').addEventListener('click', () => {

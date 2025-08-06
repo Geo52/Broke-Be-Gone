@@ -150,7 +150,6 @@ app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
   const accessToken = tokenResponse.data.access_token
   const itemId = tokenResponse.data.item_id
 
-  // store institution
   const itemResponse = await plaidClient.itemGet({ access_token: accessToken });
   const institutionId = itemResponse.data.item.institution_id;
 
@@ -163,7 +162,7 @@ app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
     });
     institutionName = institutionResponse.data.institution.name;
   }
-  
+
   const id = crypto.randomUUID()
   const now = new Date()
   await pool.query(
@@ -193,18 +192,16 @@ app.get('/api/balance', requireAuth, async (req, res) => {
     });
   }
 
-  const allBalances = []
-  for (let i = 0; i < result.rows.length; i++) {
-    const accessToken = result.rows[i].accessToken
-    const balanceResponse = await plaidClient.accountsBalanceGet({ access_token: accessToken })
-    const accounts = balanceResponse.data.accounts
+  const balanceResponses = []
 
-    for (let j = 0; j < accounts.length; j++) {
-      allBalances.push(accounts[j])
-    }
+  for (let i = 0; i < result.rows.length; i++) {
+    const token = result.rows[i].accessToken
+    const response = await plaidClient.accountsBalanceGet({ access_token: token })
+    balanceResponses.push(response.data)
   }
 
-  res.json({ accounts: allBalances })
+  res.json(balanceResponses)
+
 })
 
 // route route
